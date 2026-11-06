@@ -1,0 +1,149 @@
+variant: fcos
+version: 1.7.0
+
+passwd:
+  users:
+    - name: core
+      password_hash: $y$j9T$x4Wz61Y.lg6wYxZ23MP0.0$llMVT3JgSAFQb3qGpU7RLcPl8M0j/PXnSC8.SDUcyfC
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBam4NYQhz0WzcBLcrhau7GRlnpY10zHUKNDpfsZJe9x
+
+storage:
+  directories:
+    - path: /var/home/core/.config
+      user:
+        name: core
+      group:
+        name: core
+    - path: /var/home/core/.config/containers
+      user:
+        name: core
+      group:
+        name: core
+    - path: /var/home/core/.config/systemd
+      user:
+        name: core
+      group:
+        name: core
+    - path: /var/home/core/.config/systemd/user
+      user:
+        name: core
+      group:
+        name: core
+    # Declared with the user, or Ignition creates them as root while linking units
+    - path: /var/home/core/.config/systemd/user/timers.target.wants
+      user:
+        name: core
+      group:
+        name: core
+    - path: /var/home/core/.config/systemd/user/podman.service.d
+      user:
+        name: core
+      group:
+        name: core
+
+  links:
+    - path: /etc/localtime
+      target: ../usr/share/zoneinfo/Asia/Shanghai
+
+    - path: /home/core/.config/systemd/user/timers.target.wants/podman-auto-update.timer
+      target: /usr/lib/systemd/user/podman-auto-update.timer
+      group: 
+        name: core
+      user: 
+        name: core
+
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: KawaiMako
+
+    - path: /etc/profile.d/zz-default-editor.sh
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          export EDITOR=msedit
+
+    - path: /var/lib/systemd/linger/core
+      mode: 0644
+
+    - path: /etc/systemd/zram-generator.conf
+      mode: 0644
+      contents:
+        inline: |
+          [zram0]
+
+    - path: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:cab233:packages.repo
+      mode: 0644
+      contents:
+        inline: |
+          [copr:copr.fedorainfracloud.org:cab233:packages]
+          name=Copr repo for packages owned by cab233
+          baseurl=https://download.copr.fedorainfracloud.org/results/cab233/packages/fedora-$releasever-$basearch/
+          type=rpm-md
+          skip_if_unavailable=True
+          gpgcheck=1
+          gpgkey=https://download.copr.fedorainfracloud.org/results/cab233/packages/pubkey.gpg
+          repo_gpgcheck=0
+          enabled=1
+          enabled_metadata=1
+
+    - path: /etc/zincati/config.d/55-updates-strategy.toml
+      mode: 0644
+      contents:
+        inline: |
+          [updates]
+          strategy = "periodic"
+
+          [[updates.periodic.window]]
+          days = [ "Thu" ]
+          start_time = "04:00"
+          length_minutes = 60
+
+    - path: /etc/systemd/journald.conf.d/00-journal-size.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Journal]
+          SystemMaxUse=100M
+
+    - path: /etc/sysctl.d/90-caddy.conf
+      mode: 0644
+      contents:
+        inline: |
+          net.ipv4.ip_unprivileged_port_start = 80
+
+    # Disable Podman access logs
+    - path: /var/home/core/.config/systemd/user/podman.service.d/override.conf
+      contents:
+        inline: |
+          [Service]
+          Environment=LOGGING="--log-level=warn"
+
+systemd:
+  units:
+    - name: rpm-ostree-countme.timer
+      enabled: false
+      mask: true
+
+    - name: install-additional-software.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install -y --allow-inactive chezmoi eza fastfetch fish msedit htop sing-box
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
