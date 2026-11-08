@@ -2,56 +2,72 @@ variant: fcos
 version: 1.7.0
 
 passwd:
+  groups:
+    - name: core
+      gid: 1000
+
+    - name: runner
+      gid: 1001
   users:
     - name: core
+      uid: 1000
+      primary_group: core
       password_hash: $y$j9T$x4Wz61Y.lg6wYxZ23MP0.0$llMVT3JgSAFQb3qGpU7RLcPl8M0j/PXnSC8.SDUcyfC
       ssh_authorized_keys:
         - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBam4NYQhz0WzcBLcrhau7GRlnpY10zHUKNDpfsZJe9x
 
+    - name: runner
+      uid: 1001
+      shell: /usr/bin/nologin
+      home_dir: /var/home/runner
+      primary_group: runner
+      groups:
+        - systemd-journal
+
 storage:
   directories:
-    - path: /var/home/core/.config
+    - path: /var/home/runner/.config
       user:
-        name: core
+        name: runner
       group:
-        name: core
-    - path: /var/home/core/.config/containers
+        name: runner
+    - path: /var/home/runner/.config/containers
       user:
-        name: core
+        name: runner
       group:
-        name: core
-    - path: /var/home/core/.config/systemd
+        name: runner
+    - path: /var/home/runner/.config/systemd
       user:
-        name: core
+        name: runner
       group:
-        name: core
-    - path: /var/home/core/.config/systemd/user
+        name: runner
+    - path: /var/home/runner/.config/systemd/user
       user:
-        name: core
+        name: runner
       group:
-        name: core
+        name: runner
     # Declared with the user, or Ignition creates them as root while linking units
-    - path: /var/home/core/.config/systemd/user/timers.target.wants
+    - path: /var/home/runner/.config/systemd/user/timers.target.wants
       user:
-        name: core
+        name: runner
       group:
-        name: core
-    - path: /var/home/core/.config/systemd/user/podman.service.d
+        name: runner
+    - path: /var/home/runner/.config/systemd/user/podman.service.d
       user:
-        name: core
+        name: runner
       group:
-        name: core
+        name: runner
 
   links:
     - path: /etc/localtime
       target: ../usr/share/zoneinfo/Asia/Shanghai
 
-    - path: /home/core/.config/systemd/user/timers.target.wants/podman-auto-update.timer
+    - path: /home/runner/.config/systemd/user/timers.target.wants/podman-auto-update.timer
       target: /usr/lib/systemd/user/podman-auto-update.timer
       group: 
-        name: core
+        name: runner
       user: 
-        name: core
+        name: runner
 
   files:
     - path: /etc/hostname
@@ -67,7 +83,7 @@ storage:
         inline: |
           export EDITOR=msedit
 
-    - path: /var/lib/systemd/linger/core
+    - path: /var/lib/systemd/linger/runner
       mode: 0644
 
     - path: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:cab233:packages.repo
@@ -117,7 +133,7 @@ storage:
           net.ipv4.ip_unprivileged_port_start = 80
 
     # Disable Podman access logs
-    - path: /var/home/core/.config/systemd/user/podman.service.d/override.conf
+    - path: /var/home/runner/.config/systemd/user/podman.service.d/override.conf
       contents:
         inline: |
           [Service]
