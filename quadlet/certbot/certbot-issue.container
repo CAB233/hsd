@@ -17,7 +17,7 @@ Exec=certonly \
     --force-renewal
 
 Volume=%h/data/certbot/config/cloudflare.ini:/etc/cloudflare.ini:Z
-Volume=certbot_cert.volume:/etc/letsencrypt
+Volume=certbot_cert.volume:/etc/letsencrypt:z
 
 [Service]
 Type=oneshot
