@@ -1,0 +1,23 @@
+[Unit]
+AssertPathIsDirectory=%h/data/certbot/config
+AssertPathExists=%h/data/certbot/config/cloudflare.ini
+
+[Container]
+ContainerName=certbot-issue
+Image=docker.io/certbot/dns-cloudflare:v5.8.0
+NoNewPrivileges=true
+Exec=certonly \
+    --dns-cloudflare \
+    --agree-tos \
+    --preferred-chain "ISRG Root X2" \
+    --dns-cloudflare-credentials /etc/cloudflare.ini \
+    --required-profile shortlived \
+    --domains "home.zuoye.win" \
+    --domains "*.home.zuoye.win" \
+    --force-renewal
+
+Volume=%h/data/certbot/config/cloudflare.ini:/etc/cloudflare.ini:Z
+Volume=certbot_cert.volume:/etc/letsencrypt
+
+[Service]
+Type=oneshot

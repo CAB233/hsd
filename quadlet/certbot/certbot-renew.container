@@ -1,0 +1,16 @@
+[Unit]
+AssertPathIsDirectory=%h/data/certbot/config
+AssertPathExists=%h/data/certbot/config/cloudflare.ini
+
+[Container]
+ContainerName=certbot-renew
+Image=docker.io/certbot/dns-cloudflare:v5.8.0
+NoNewPrivileges=true
+Exec=renew
+
+Volume=%h/data/certbot/config/cloudflare.ini:/etc/cloudflare.ini:Z
+Volume=certbot_cert.volume:/etc/letsencrypt
+
+[Service]
+Type=oneshot
+ExecStartPost=systemctl --user reload caddy
