@@ -1,0 +1,25 @@
+[Unit]
+After=podman.socket
+Requires=podman.socket
+
+[Container]
+ContainerName=dozzle
+Image=docker.io/amir20/dozzle:latest
+AutoUpdate=registry
+NoNewPrivileges=true
+ReadOnly=true
+# Fix "Could not connect to any Docker Engine"
+SecurityLabelDisable=true
+
+Environment=DOZZLE_NO_ANALYTICS=true
+
+Volume=%t/podman/podman.sock:/var/run/docker.sock:z,ro
+
+Network=caddy.network
+
+[Service]
+Restart=on-failure
+RestartSec=15s
+
+[Install]
+WantedBy=default.target
