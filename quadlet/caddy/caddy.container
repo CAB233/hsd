@@ -18,9 +18,9 @@ ReadOnly=true
 SecurityLabelDisable=true
 
 Volume=%h/data/caddy/config:/etc/caddy:Z
-Volume=caddy_config.volume:/config
-Volume=caddy_data.volume:/data
-Volume=certbot_cert.volume:/etc/letsencrypt
+Volume=caddy_config.volume:/config:Z
+Volume=caddy_data.volume:/data:Z
+Volume=certbot_cert.volume:/etc/letsencrypt:z,ro
 
 Network=caddy.network
 
