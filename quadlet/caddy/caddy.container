@@ -1,0 +1,28 @@
+[Unit]
+AssertPathIsDirectory=%h/data/caddy/config
+AssertPathExists=%h/data/caddy/config/Caddyfile
+After=caddy.socket
+Requires=caddy.socket
+
+[Container]
+ContainerName=caddy
+Image=docker.io/library/caddy:2.11-alpine
+AutoUpdate=registry
+Exec=/usr/bin/caddy run --config /etc/caddy/Caddyfile
+NoNewPrivileges=true
+Notify=true
+ReadOnly=true
+
+# Connet to host
+# https://github.com/eriksjolund/podman-caddy-socket-activation/issues/39
+SecurityLabelDisable=true
+
+Volume=%h/data/caddy/config:/etc/caddy:Z
+Volume=caddy_config.volume:/config
+Volume=caddy_data.volume:/data
+Volume=certbot_cert.volume:/etc/letsencrypt
+
+Network=caddy.network
+
+[Service]
+ExecReload=podman exec caddy /usr/bin/caddy reload --config /etc/caddy/Caddyfile --address unix//run/admin.sock --force
