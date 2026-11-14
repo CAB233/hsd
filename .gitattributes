@@ -1,0 +1,5 @@
+*.bu linguist-language=yaml
+*.container linguist-language=Ini
+*.pod linguist-language=Ini
+*.network linguist-language=Ini
+*.volume linguist-language=Ini
