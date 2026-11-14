@@ -1,0 +1,18 @@
+[Container]
+ContainerName=syncthing
+Image=docker.io/syncthing/syncthing:2.1
+AutoUpdate=registry
+
+Volume=%h/music:/music:z
+Volume=%h/syncthing_config.volume:/var/syncthing/config:Z
+
+Environment=PUID=0 PGID=0
+
+Network=host
+
+[Service]
+Restart=on-failure
+RestartSec=10min
+
+[Install]
+WantedBy=default.target
