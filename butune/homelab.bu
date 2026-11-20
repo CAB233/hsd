@@ -127,18 +127,28 @@ storage:
           [Journal]
           SystemMaxUse=100M
 
-    - path: /etc/sysctl.d/90-caddy.conf
-      mode: 0644
-      contents:
-        inline: |
-          net.ipv4.ip_unprivileged_port_start = 80
-
     # Disable Podman access logs
     - path: /var/home/runner/.config/systemd/user/podman.service.d/override.conf
       contents:
         inline: |
           [Service]
           Environment=LOGGING="--log-level=warn"
+
+    - path: /etc/sysctl.d/90-caddy.conf
+      mode: 0644
+      contents:
+        inline: |
+          net.ipv4.ip_unprivileged_port_start = 80
+
+    # https://wiki.archlinuxcn.org/wiki/Zram#%E4%BC%98%E5%8C%96_zram_%E4%B8%8A%E7%9A%84_swap
+    - path: /etc/sysctl.d/99-vm-zram-parameters.conf
+      mode: 0644
+      contents:
+        inline: |
+          vm.swappiness = 180
+          vm.watermark_boost_factor = 0
+          vm.watermark_scale_factor = 125
+          vm.page-cluster = 0
 
 systemd:
   units:
