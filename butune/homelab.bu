@@ -91,6 +91,7 @@ storage:
       contents:
         inline: |
           [zram0]
+          compression-algorithm = zstd
 
     - path: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:cab233:packages.repo
       mode: 0644
